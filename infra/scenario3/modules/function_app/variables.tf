@@ -62,3 +62,13 @@ variable "log_analytics_workspace_id" {
   description = "The id of the Log Analytics workspace to send logs to"
   type        = string
 }
+
+variable "application_insights_connection_string" {
+  description = "The connection string for Application Insights"
+  type        = string
+}
+
+variable "application_insights_key" {
+  description = "The key for Application Insights"
+  type        = string
+}

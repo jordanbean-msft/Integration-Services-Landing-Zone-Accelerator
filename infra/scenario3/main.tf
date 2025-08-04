@@ -81,7 +81,7 @@ module "logic_app_storage_account" {
   user_assigned_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
   account_tier                        = var.logic_app.storage_account_account_tier
   account_replication_type            = var.logic_app.storage_account_account_replication_type
-  file_share_name                     = "logic${local.resource_token}"
+  file_share_name                     = local.logic_app_name
   file_share_quota                    = var.logic_app.storage_account_file_share_quota
 }
 
@@ -129,7 +129,7 @@ module "logic_app_app_service_plan" {
   name_suffix            = "logic-${local.resource_token}"
   location               = var.location
   resource_group_name    = var.resource_group_name
-  os_type                = "Linux"
+  os_type                = "Windows"
   sku_name               = var.logic_app.sku_name
   tags                   = local.tags
   zone_balancing_enabled = var.zone_redundancy_enabled
@@ -161,7 +161,7 @@ module "key_vault" {
   principal_id               = var.principal_id
   access_policy_object_ids   = []
   secrets                    = []
-  subnet_id                  = data.azurerm_subnet.private_endpoint_subnet.id
+  subnet_id                  = module.virtual_network.private_endpoint_subnet_resource_id
   log_analytics_workspace_id = module.log_analytics_workspace.log_analytics_workspace_resource_id
 }
 
@@ -170,20 +170,22 @@ module "key_vault" {
 # ------------------------------------------------------------------------------------------------------
 
 module "function_app" {
-  source                         = "./modules/function_app"
-  location                       = var.location
-  resource_group_name            = var.resource_group_name
-  name_suffix                    = local.function_app_name
-  service_plan_resource_id       = module.function_app_app_service_plan.resource_id
-  tags                           = merge(local.tags, { "azd-service-name" = "function-app" })
-  private_endpoint_subnet_id     = data.azurerm_subnet.private_endpoint_subnet.id
-  vnet_function_subnet_id        = data.azurerm_subnet.function_app_subnet.id
-  managed_identity_principal_id  = module.managed_identity.user_assigned_identity_principal_id
-  managed_identity_id            = module.managed_identity.user_assigned_identity_id
-  storage_account_name           = module.function_app_storage_account.storage_account_name
-  storage_account_container_name = local.function_app_name
-  app_settings                   = {}
-  log_analytics_workspace_id     = module.log_analytics_workspace.log_analytics_workspace_resource_id
+  source                                 = "./modules/function_app"
+  location                               = var.location
+  resource_group_name                    = var.resource_group_name
+  name_suffix                            = local.function_app_name
+  service_plan_resource_id               = module.function_app_app_service_plan.resource_id
+  tags                                   = merge(local.tags, { "azd-service-name" = "function-app" })
+  private_endpoint_subnet_id             = module.virtual_network.private_endpoint_subnet_resource_id
+  vnet_function_subnet_id                = module.virtual_network.function_app_subnet_resource_id
+  managed_identity_principal_id          = module.managed_identity.user_assigned_identity_principal_id
+  managed_identity_id                    = module.managed_identity.user_assigned_identity_id
+  storage_account_name                   = module.function_app_storage_account.storage_account_name
+  storage_account_container_name         = local.function_app_name
+  app_settings                           = {}
+  log_analytics_workspace_id             = module.log_analytics_workspace.log_analytics_workspace_resource_id
+  application_insights_connection_string = module.application_insights.application_insights_connection_string
+  application_insights_key               = module.application_insights.application_insights_key
 }
 
 # ------------------------------------------------------------------------------------------------------
@@ -197,8 +199,8 @@ module "logic_app" {
   name_suffix                   = local.logic_app_name
   service_plan_resource_id      = module.logic_app_app_service_plan.resource_id
   tags                          = merge(local.tags, { "azd-service-name" = "logic-app" })
-  private_endpoint_subnet_id    = data.azurerm_subnet.private_endpoint_subnet.id
-  vnet_logic_app_subnet_id      = data.azurerm_subnet.logic_app_subnet.id
+  private_endpoint_subnet_id    = module.virtual_network.private_endpoint_subnet_resource_id
+  vnet_logic_app_subnet_id      = module.virtual_network.logic_app_subnet_resource_id
   managed_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
   managed_identity_id           = module.managed_identity.user_assigned_identity_id
   storage_account_name          = module.logic_app_storage_account.storage_account_name
@@ -206,8 +208,14 @@ module "logic_app" {
   storage_account_share_name    = local.logic_app_name
   app_settings = {
     "WEBSITE_CONTENTOVERVNET" : 1
+    "FUNCTIONS_WORKER_RUNTIME" : "node"
+    "WEBSITE_DNS_SERVER" : var.logic_app.website_dns_server
+    "APPINSIGHTS_INSTRUMENTATIONKEY" : module.application_insights.application_insights_key
+    "APPLICATIONINSIGHTS_CONNECTIONSTRING" : module.application_insights.application_insights_connection_string
   }
-  log_analytics_workspace_id = module.log_analytics_workspace.log_analytics_workspace_resource_id
+  log_analytics_workspace_id             = module.log_analytics_workspace.log_analytics_workspace_resource_id
+  application_insights_connection_string = module.application_insights.application_insights_connection_string
+  application_insights_key               = module.application_insights.application_insights_key
 }
 
 
@@ -225,7 +233,7 @@ module "nsg_private_endpoint" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "private_endpoint" {
-  subnet_id                 = data.azurerm_subnet.private_endpoint_subnet.id
+  subnet_id                 = module.virtual_network.private_endpoint_subnet_resource_id
   network_security_group_id = module.nsg_private_endpoint.network_security_group_id
 }
 
@@ -238,7 +246,7 @@ module "nsg_apim" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "apim" {
-  subnet_id                 = data.azurerm_subnet.apim_subnet.id
+  subnet_id                 = module.virtual_network.apim_subnet_resource_id
   network_security_group_id = module.nsg_apim.network_security_group_id
 }
 
@@ -251,7 +259,7 @@ module "nsg_logic_app" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "logic_app" {
-  subnet_id                 = data.azurerm_subnet.logic_app_subnet.id
+  subnet_id                 = module.virtual_network.logic_app_subnet_resource_id
   network_security_group_id = module.nsg_logic_app.network_security_group_id
 }
 
@@ -264,6 +272,34 @@ module "nsg_function_app" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "function_app" {
-  subnet_id                 = data.azurerm_subnet.function_app_subnet.id
+  subnet_id                 = module.virtual_network.function_app_subnet_resource_id
   network_security_group_id = module.nsg_function_app.network_security_group_id
+}
+
+# ------------------------------------------------------------------------------------------------------
+# Deploy API Management
+# ------------------------------------------------------------------------------------------------------
+
+module "api_management" {
+  source                                   = "./modules/api_management"
+  name_suffix                              = "apim-${local.resource_token}"
+  location                                 = var.location
+  resource_group_name                      = var.resource_group_name
+  tags                                     = local.tags
+  api_management_subnet_id                 = module.virtual_network.apim_subnet_resource_id
+  application_insights_id                  = module.application_insights.application_insights_id
+  application_insights_instrumentation_key = module.application_insights.application_insights_key
+  log_analytics_workspace_id               = module.log_analytics_workspace.log_analytics_workspace_resource_id
+  key_vault_id                             = module.key_vault.key_vault_id
+  private_endpoint_subnet_id               = module.virtual_network.private_endpoint_subnet_resource_id
+  publisher_email                          = var.apim.publisher_email
+  publisher_name                           = var.apim.publisher_name
+  subscription_id                          = data.azurerm_client_config.current.subscription_id
+  sku_name                                 = var.apim.sku_name
+  sku_capacity                             = var.apim.sku_capacity
+  tenant_id                                = data.azurerm_client_config.current.tenant_id
+  user_assigned_identity_id                = module.managed_identity.user_assigned_identity_id
+  user_assigned_identity_client_id         = module.managed_identity.user_assigned_identity_client_id
+  user_assigned_identity_principal_id      = module.managed_identity.user_assigned_identity_principal_id
+  zones                                    = var.apim.zones
 }

@@ -30,6 +30,7 @@ variable "logic_app" {
     storage_account_file_share_quota         = number
     sku_name                                 = string
     worker_count                             = number
+    website_dns_server                       = string
   })
 }
 

@@ -47,6 +47,7 @@ module "avm-res-storage-storageaccount" {
     bypass         = ["AzureServices"]
   }
   public_network_access_enabled = false
+  https_traffic_only_enabled    = true
   role_assignments = {
     user_assigned_managed_identity = {
       principal_id               = var.user_assigned_identity_principal_id
@@ -78,6 +79,7 @@ module "avm-res-storage-storageaccount" {
   }
   private_endpoints_manage_dns_zone_group = false
   account_replication_type                = var.account_replication_type
+  shared_access_key_enabled               = true
 }
 
 resource "azurerm_storage_share" "file_share" {

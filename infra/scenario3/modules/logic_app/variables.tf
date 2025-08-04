@@ -68,3 +68,13 @@ variable "storage_account_share_name" {
   description = "The name of the storage account share"
   type        = string
 }
+
+variable "application_insights_connection_string" {
+  description = "The connection string for Application Insights"
+  type        = string
+}
+
+variable "application_insights_key" {
+  description = "The key for Application Insights"
+  type        = string
+}

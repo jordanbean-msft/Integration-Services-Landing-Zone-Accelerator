@@ -21,11 +21,10 @@ module "function_app" {
   fc1_runtime_version                            = "3.12"
   webdeploy_publish_basic_authentication_enabled = false
   https_only                                     = true
-  application_insights = {
-    workspace_resource_id = var.log_analytics_workspace_id
-  }
   site_config = {
-    ip_restriction_default_action = "Deny"
+    ip_restriction_default_action          = "Deny"
+    application_insights_connection_string = var.application_insights_connection_string
+    application_insights_key               = var.application_insights_key
   }
   managed_identities = {
     user_assigned_resource_ids = [var.managed_identity_id]
@@ -43,6 +42,7 @@ module "function_app" {
       subnet_resource_id = var.private_endpoint_subnet_id
     }
   }
+  enable_application_insights = false
   # diagnostic_settings = {
   #   logging = {
   #     name                  = "function-logging"
