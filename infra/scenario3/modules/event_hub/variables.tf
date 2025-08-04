@@ -13,11 +13,6 @@ variable "name_suffix" {
   type        = string
 }
 
-variable "service_plan_resource_id" {
-  description = "The resource ID of the service plan to use for the function app"
-  type        = string
-}
-
 variable "tags" {
   description = "A list of tags used for deployed services."
   type        = map(string)
@@ -25,11 +20,6 @@ variable "tags" {
 
 variable "private_endpoint_subnet_id" {
   description = "The subnet id to deploy the private endpoint into."
-  type        = string
-}
-
-variable "vnet_function_subnet_id" {
-  description = "The subnet id to deploy the Azure Function into."
   type        = string
 }
 
@@ -43,38 +33,17 @@ variable "managed_identity_id" {
   type        = string
 }
 
-variable "storage_account_name" {
-  description = "The name of the storage account"
-  type        = string
-}
-
-variable "app_settings" {
-  description = "The app settings of the function app"
-  type        = map(string)
-}
-
 variable "log_analytics_workspace_id" {
   description = "The id of the Log Analytics workspace to send logs to"
   type        = string
 }
 
-variable "application_insights_connection_string" {
-  description = "The connection string for Application Insights"
+variable "sku" {
+  description = "SKU for Event Hub Namespace."
   type        = string
 }
 
-variable "application_insights_key" {
-  description = "The key for Application Insights"
-  type        = string
-}
-
-
-variable "storage_account_share_name" {
-  description = "The name of the storage account share"
-  type        = string
-}
-
-variable "key_vault_reference_identity_id" {
-  description = "The identity id for the Key Vault reference"
-  type        = string
+variable "capacity" {
+  description = "Capacity for Event Hub Namespace."
+  type        = number
 }

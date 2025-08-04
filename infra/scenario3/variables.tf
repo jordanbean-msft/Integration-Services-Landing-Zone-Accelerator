@@ -1,4 +1,3 @@
-
 variable "location" {
   description = "The Azure location to deploy the resources"
   type        = string
@@ -95,5 +94,13 @@ variable "file_storage_storage_account" {
   type = object({
     account_tier             = string
     account_replication_type = string
+  })
+}
+
+variable "event_hub" {
+  description = "Configuration for Azure Event Hub Namespace"
+  type = object({
+    sku      = string
+    capacity = number
   })
 }

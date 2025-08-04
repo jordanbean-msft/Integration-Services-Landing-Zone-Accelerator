@@ -8,7 +8,7 @@ resource "azapi_update_resource" "add_subnet_delegation_for_function_app_subnet"
         {
           name = "delegation"
           properties = {
-            serviceName = "Microsoft.App/environments" # this is needed for Function Apps Flex Consumption
+            serviceName = "Microsoft.Web/serverFarms"
           }
         }
       ]

@@ -181,11 +181,12 @@ module "function_app" {
   managed_identity_principal_id          = module.managed_identity.user_assigned_identity_principal_id
   managed_identity_id                    = module.managed_identity.user_assigned_identity_id
   storage_account_name                   = module.function_app_storage_account.storage_account_name
-  storage_account_container_name         = local.function_app_name
+  storage_account_share_name             = local.function_app_name
   app_settings                           = {}
   log_analytics_workspace_id             = module.log_analytics_workspace.log_analytics_workspace_resource_id
   application_insights_connection_string = module.application_insights.application_insights_connection_string
   application_insights_key               = module.application_insights.application_insights_key
+  key_vault_reference_identity_id        = module.managed_identity.user_assigned_identity_id
 }
 
 # ------------------------------------------------------------------------------------------------------
@@ -218,6 +219,22 @@ module "logic_app" {
   application_insights_key               = module.application_insights.application_insights_key
 }
 
+# ------------------------------------------------------------------------------------------------------
+# Deploy Event Hub Namespace
+# ------------------------------------------------------------------------------------------------------
+module "event_hub_namespace" {
+  source                        = "./modules/event_hub"
+  name_suffix                   = local.resource_token
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  tags                          = local.tags
+  log_analytics_workspace_id    = module.log_analytics_workspace.log_analytics_workspace_resource_id
+  private_endpoint_subnet_id    = module.virtual_network.private_endpoint_subnet_resource_id
+  managed_identity_id           = module.managed_identity.user_assigned_identity_id
+  managed_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
+  sku                           = var.event_hub.sku
+  capacity                      = var.event_hub.capacity
+}
 
 # ------------------------------------------------------------------------------------------------------
 # Deploy Network Security Groups for each subnet
