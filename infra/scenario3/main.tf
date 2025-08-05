@@ -191,6 +191,7 @@ module "function_app" {
     "WEBSITE_CONTENTSHARE"                     = local.function_app_name
     "WEBSITE_DNS_SERVER"                       = var.function_app.website_dns_server
     "WEBSITE_CONTENTOVERVNET"                  = "1"
+    "FUNCTIONS_WORKER_RUNTIME"                 = "python"
   }
   log_analytics_workspace_id             = module.log_analytics_workspace.log_analytics_workspace_resource_id
   application_insights_connection_string = module.application_insights.application_insights_connection_string
@@ -219,7 +220,6 @@ module "logic_app" {
   app_settings = {
     "FUNCTIONS_WORKER_RUNTIME" : "node"
     "WEBSITE_DNS_SERVER" : var.logic_app.website_dns_server
-    "APPINSIGHTS_INSTRUMENTATIONKEY" : module.application_insights.application_insights_key
     "APPLICATIONINSIGHTS_CONNECTIONSTRING" : module.application_insights.application_insights_connection_string
   }
   log_analytics_workspace_id             = module.log_analytics_workspace.log_analytics_workspace_resource_id

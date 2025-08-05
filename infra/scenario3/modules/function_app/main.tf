@@ -17,8 +17,6 @@ module "function_app" {
   function_app_uses_fc1                          = false
   tags                                           = var.tags
   app_settings                                   = var.app_settings
-  fc1_runtime_name                               = "python"
-  fc1_runtime_version                            = "3.12"
   key_vault_reference_identity_id                = var.key_vault_reference_identity_id
   webdeploy_publish_basic_authentication_enabled = false
   https_only                                     = true
@@ -27,7 +25,11 @@ module "function_app" {
     application_insights_connection_string = var.application_insights_connection_string
     application_insights_key               = var.application_insights_key
     vnet_route_all_enabled                 = true
+    linux_fx_version                       = "Python|3.12"
+    runtime_scale_monitoring_enabled       = true
+    always_on                              = true
   }
+  ftp_publish_basic_authentication_enabled = false
   managed_identities = {
     user_assigned_resource_ids = [var.managed_identity_id]
   }
