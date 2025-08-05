@@ -49,10 +49,25 @@ module "avm-res-storage-storageaccount" {
   public_network_access_enabled = false
   https_traffic_only_enabled    = true
   role_assignments = {
-    user_assigned_managed_identity = {
+    managed_identity_contributor = {
+      principal_id               = var.user_assigned_identity_principal_id
+      principal_type             = "ServicePrincipal"
+      role_definition_id_or_name = "Storage Account Contributor"
+    }
+    managed_identity_blob_contributor = {
       principal_id               = var.user_assigned_identity_principal_id
       principal_type             = "ServicePrincipal"
       role_definition_id_or_name = "Storage Blob Data Contributor"
+    }
+    managed_identity_table_contributor = {
+      principal_id               = var.user_assigned_identity_principal_id
+      principal_type             = "ServicePrincipal"
+      role_definition_id_or_name = "Storage Table Data Contributor"
+    }
+    managed_identity_queue_contributor = {
+      principal_id               = var.user_assigned_identity_principal_id
+      principal_type             = "ServicePrincipal"
+      role_definition_id_or_name = "Storage Queue Data Contributor"
     }
   }
   private_endpoints = {

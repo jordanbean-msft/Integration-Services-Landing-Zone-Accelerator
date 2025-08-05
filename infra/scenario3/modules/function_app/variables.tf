@@ -78,3 +78,8 @@ variable "key_vault_reference_identity_id" {
   description = "The identity id for the Key Vault reference"
   type        = string
 }
+
+variable "storage_account_access_key" {
+  description = "The access key for the storage account"
+  type        = string
+}

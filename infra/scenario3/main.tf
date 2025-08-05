@@ -95,6 +95,8 @@ module "function_app_storage_account" {
   user_assigned_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
   account_tier                        = var.function_app.storage_account_account_tier
   account_replication_type            = var.function_app.storage_account_account_replication_type
+  file_share_name                     = local.function_app_name
+  file_share_quota                    = var.function_app.storage_account_file_share_quota
 }
 
 module "file_storage_account" {
@@ -170,19 +172,26 @@ module "key_vault" {
 # ------------------------------------------------------------------------------------------------------
 
 module "function_app" {
-  source                                 = "./modules/function_app"
-  location                               = var.location
-  resource_group_name                    = var.resource_group_name
-  name_suffix                            = local.function_app_name
-  service_plan_resource_id               = module.function_app_app_service_plan.resource_id
-  tags                                   = merge(local.tags, { "azd-service-name" = "function-app" })
-  private_endpoint_subnet_id             = module.virtual_network.private_endpoint_subnet_resource_id
-  vnet_function_subnet_id                = module.virtual_network.function_app_subnet_resource_id
-  managed_identity_principal_id          = module.managed_identity.user_assigned_identity_principal_id
-  managed_identity_id                    = module.managed_identity.user_assigned_identity_id
-  storage_account_name                   = module.function_app_storage_account.storage_account_name
-  storage_account_share_name             = local.function_app_name
-  app_settings                           = {}
+  source                        = "./modules/function_app"
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  name_suffix                   = local.function_app_name
+  service_plan_resource_id      = module.function_app_app_service_plan.resource_id
+  tags                          = merge(local.tags, { "azd-service-name" = "function-app" })
+  private_endpoint_subnet_id    = module.virtual_network.private_endpoint_subnet_resource_id
+  vnet_function_subnet_id       = module.virtual_network.function_app_subnet_resource_id
+  managed_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
+  managed_identity_id           = module.managed_identity.user_assigned_identity_id
+  storage_account_name          = module.function_app_storage_account.storage_account_name
+  storage_account_share_name    = local.function_app_name
+  storage_account_access_key    = module.function_app_storage_account.storage_account_access_key
+  app_settings = {
+    "AzureWebJobsStorage"                      = module.function_app_storage_account.storage_account_connection_string
+    "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = module.function_app_storage_account.storage_account_connection_string
+    "WEBSITE_CONTENTSHARE"                     = local.function_app_name
+    "WEBSITE_DNS_SERVER"                       = var.function_app.website_dns_server
+    "WEBSITE_CONTENTOVERVNET"                  = "1"
+  }
   log_analytics_workspace_id             = module.log_analytics_workspace.log_analytics_workspace_resource_id
   application_insights_connection_string = module.application_insights.application_insights_connection_string
   application_insights_key               = module.application_insights.application_insights_key
@@ -208,7 +217,6 @@ module "logic_app" {
   storage_account_access_key    = module.logic_app_storage_account.storage_account_access_key
   storage_account_share_name    = local.logic_app_name
   app_settings = {
-    "WEBSITE_CONTENTOVERVNET" : 1
     "FUNCTIONS_WORKER_RUNTIME" : "node"
     "WEBSITE_DNS_SERVER" : var.logic_app.website_dns_server
     "APPINSIGHTS_INSTRUMENTATIONKEY" : module.application_insights.application_insights_key

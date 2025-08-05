@@ -30,3 +30,8 @@ output "storage_account_access_key" {
   value     = module.avm-res-storage-storageaccount.resource.primary_access_key
   sensitive = true
 }
+
+output "storage_account_connection_string" {
+  value     = module.avm-res-storage-storageaccount.resource.primary_connection_string
+  sensitive = true
+}

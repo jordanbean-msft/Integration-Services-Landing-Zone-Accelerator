@@ -29,8 +29,9 @@ module "logic_app" {
       subnet_resource_id = var.private_endpoint_subnet_id
     }
   }
-  virtual_network_subnet_id       = var.vnet_logic_app_subnet_id
-  key_vault_reference_identity_id = var.managed_identity_id
+  private_endpoints_manage_dns_zone_group = false
+  virtual_network_subnet_id               = var.vnet_logic_app_subnet_id
+  key_vault_reference_identity_id         = var.managed_identity_id
   managed_identities = {
     user_assigned_resource_ids = [var.managed_identity_id]
   }

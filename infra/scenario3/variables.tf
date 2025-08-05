@@ -38,8 +38,10 @@ variable "function_app" {
   type = object({
     storage_account_account_tier             = string
     storage_account_account_replication_type = string
+    storage_account_file_share_quota         = number
     sku_name                                 = string
     worker_count                             = number
+    website_dns_server                       = string
   })
 }
 

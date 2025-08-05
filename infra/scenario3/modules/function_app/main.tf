@@ -26,23 +26,24 @@ module "function_app" {
     ip_restriction_default_action          = "Deny"
     application_insights_connection_string = var.application_insights_connection_string
     application_insights_key               = var.application_insights_key
+    vnet_route_all_enabled                 = true
   }
   managed_identities = {
     user_assigned_resource_ids = [var.managed_identity_id]
   }
-  virtual_network_subnet_id         = var.vnet_function_subnet_id
-  storage_account_name              = var.storage_account_name
-  storage_authentication_type       = "UserAssignedIdentity"
-  storage_user_assigned_identity_id = var.managed_identity_id
-  storage_account_share_name        = var.storage_account_share_name
-  public_network_access_enabled     = false
-  all_child_resources_inherit_tags  = false
+  virtual_network_subnet_id        = var.vnet_function_subnet_id
+  storage_account_name             = var.storage_account_name
+  storage_account_share_name       = var.storage_account_share_name
+  storage_account_access_key       = var.storage_account_access_key
+  public_network_access_enabled    = false
+  all_child_resources_inherit_tags = false
   private_endpoints = {
     primary = {
       subnet_resource_id = var.private_endpoint_subnet_id
     }
   }
-  enable_application_insights = false
+  private_endpoints_manage_dns_zone_group = false
+  enable_application_insights             = false
   # diagnostic_settings = {
   #   logging = {
   #     name                  = "function-logging"
