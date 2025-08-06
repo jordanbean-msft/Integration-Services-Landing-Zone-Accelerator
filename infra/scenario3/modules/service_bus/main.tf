@@ -34,4 +34,11 @@ module "servicebus" {
     default_action           = "Deny"
     trusted_services_allowed = true
   }
+  role_assignments = {
+    managed_identity_servicebus_owner = {
+      role_definition_name = "Azure Service Bus Data Owner"
+      principal_id         = var.managed_identity_id
+      principal_type       = "ServicePrincipal"
+    }
+  }
 }

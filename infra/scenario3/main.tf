@@ -218,9 +218,14 @@ module "logic_app" {
   storage_account_access_key    = module.logic_app_storage_account.storage_account_access_key
   storage_account_share_name    = local.logic_app_name
   app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME" : "node"
     "WEBSITE_DNS_SERVER" : var.logic_app.website_dns_server
     "APPLICATIONINSIGHTS_CONNECTIONSTRING" : module.application_insights.application_insights_connection_string
+    "APPINSIGHTS_INSTRUMENTATIONKEY" : module.application_insights.application_insights_key
+    "ApplicationInsightsAgent_EXTENSION_VERSION" : "~2"
+    "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = module.logic_app_storage_account.storage_account_connection_string
+    "WEBSITE_CONTENTSHARE"                     = local.logic_app_name
+    "FUNCTIONS_WORKER_RUNTIME" : "dotnet"
+    "FUNCTIONS_EXTENSION_VERSION" : "~4"
   }
   log_analytics_workspace_id             = module.log_analytics_workspace.log_analytics_workspace_resource_id
   application_insights_connection_string = module.application_insights.application_insights_connection_string
@@ -327,4 +332,24 @@ module "api_management" {
   user_assigned_identity_client_id         = module.managed_identity.user_assigned_identity_client_id
   user_assigned_identity_principal_id      = module.managed_identity.user_assigned_identity_principal_id
   zones                                    = var.apim.zones
+}
+
+# ------------------------------------------------------------------------------------------------------
+# Deploy Azure SQL
+# ------------------------------------------------------------------------------------------------------
+
+module "azure_sql" {
+  source                               = "./modules/sql"
+  location                             = var.location
+  resource_group_name                  = var.resource_group_name
+  name_suffix                          = local.name_suffix
+  tags                                 = local.tags
+  server_version                       = var.sql.server_version
+  azuread_administrator_login_username = var.sql.azuread_administrator_login_username
+  azuread_administrator_object_id      = var.sql.azuread_administrator_object_id
+  log_analytics_workspace_id           = module.log_analytics_workspace.log_analytics_workspace_resource_id
+  managed_identity_id                  = module.managed_identity.user_assigned_identity_id
+  managed_identity_principal_id        = module.managed_identity.user_assigned_identity_principal_id
+  private_endpoint_subnet_id           = module.virtual_network.private_endpoint_subnet_resource_id
+  tenant_id                            = data.azurerm_client_config.current.tenant_id
 }

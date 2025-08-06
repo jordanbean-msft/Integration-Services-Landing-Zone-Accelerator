@@ -22,6 +22,14 @@ module "eventhub_namespace" {
       subresource_name   = "namespace"
     }
   }
+  public_network_access_enabled = false
+  role_assignments = {
+    managed_identity_event_hub_sender = {
+      role_definition_id_or_name = "Azure Event Hubs Data Sender"
+      principal_id               = var.managed_identity_principal_id
+      principal_type             = "ServicePrincipal"
+    }
+  }
   diagnostic_settings = {
     logging = {
       name                  = "eventhub-logging"

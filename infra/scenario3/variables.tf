@@ -87,7 +87,9 @@ variable "service_bus" {
 variable "sql" {
   description = "Configuration for Azure SQL Database"
   type = object({
-    sku_name = string
+    server_version                       = string
+    azuread_administrator_login_username = string
+    azuread_administrator_object_id      = string
   })
 }
 

@@ -1,11 +1,7 @@
-output "function_app_name" {
-  value = module.function_app.name
+output "azure_sql_name" {
+  value = module.azure_sql.resource_name
 }
 
-output "function_app_id" {
-  value = module.function_app.resource_id
-}
-
-output "function_app_uri" {
-  value = module.function_app.resource_uri
+output "azure_sql_id" {
+  value = module.azure_sql.resource_id
 }

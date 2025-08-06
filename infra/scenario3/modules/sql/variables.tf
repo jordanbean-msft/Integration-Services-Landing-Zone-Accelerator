@@ -42,3 +42,18 @@ variable "server_version" {
   description = "The version of the SQL server"
   type        = string
 }
+
+variable "azuread_administrator_login_username" {
+  description = "The login username for the Azure AD administrator"
+  type        = string
+}
+
+variable "azuread_administrator_object_id" {
+  description = "The object id of the Azure AD administrator"
+  type        = string
+}
+
+variable "tenant_id" {
+  description = "The tenant id for the Azure AD administrator"
+  type        = string
+}
