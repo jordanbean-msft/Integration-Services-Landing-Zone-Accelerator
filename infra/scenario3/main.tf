@@ -1,9 +1,9 @@
 locals {
   tags              = { azd-env-name : var.environment_name }
   sha               = base64encode(sha256("${var.location}${data.azurerm_client_config.current.subscription_id}${var.resource_group_name}"))
-  resource_token    = substr(replace(lower(local.sha), "[^A-Za-z0-9_]", ""), 0, 13)
-  function_app_name = "function-${local.resource_token}"
-  logic_app_name    = "logic-${local.resource_token}"
+  name_suffix       = substr(replace(lower(local.sha), "[^A-Za-z0-9_]", ""), 0, 13)
+  function_app_name = "func-${local.name_suffix}"
+  logic_app_name    = "logic-${local.name_suffix}"
 }
 
 data "azurerm_subnet" "private_endpoint_subnet" {
@@ -36,7 +36,7 @@ data "azurerm_subnet" "function_app_subnet" {
 
 module "log_analytics_workspace" {
   source              = "./modules/log_analytics"
-  name_suffix         = local.resource_token
+  name_suffix         = local.name_suffix
   location            = var.location
   resource_group_name = var.resource_group_name
   tags                = local.tags
@@ -48,7 +48,7 @@ module "log_analytics_workspace" {
 
 module "application_insights" {
   source                = "./modules/app_insights"
-  name_suffix           = local.resource_token
+  name_suffix           = local.name_suffix
   location              = var.location
   resource_group_name   = var.resource_group_name
   workspace_resource_id = module.log_analytics_workspace.log_analytics_workspace_resource_id
@@ -61,7 +61,7 @@ module "application_insights" {
 
 module "managed_identity" {
   source              = "./modules/managed_identity"
-  name_suffix         = local.resource_token
+  name_suffix         = local.name_suffix
   location            = var.location
   resource_group_name = var.resource_group_name
   tags                = local.tags
@@ -73,7 +73,7 @@ module "managed_identity" {
 
 module "logic_app_storage_account" {
   source                              = "./modules/storage_account"
-  name_suffix                         = "logic${local.resource_token}"
+  name_suffix                         = "logic${local.name_suffix}"
   location                            = var.location
   resource_group_name                 = var.resource_group_name
   log_analytics_workspace_resource_id = module.log_analytics_workspace.log_analytics_workspace_resource_id
@@ -87,7 +87,7 @@ module "logic_app_storage_account" {
 
 module "function_app_storage_account" {
   source                              = "./modules/storage_account"
-  name_suffix                         = "func${local.resource_token}"
+  name_suffix                         = "func${local.name_suffix}"
   location                            = var.location
   resource_group_name                 = var.resource_group_name
   log_analytics_workspace_resource_id = module.log_analytics_workspace.log_analytics_workspace_resource_id
@@ -101,7 +101,7 @@ module "function_app_storage_account" {
 
 module "file_storage_account" {
   source                              = "./modules/storage_account"
-  name_suffix                         = "file${local.resource_token}"
+  name_suffix                         = "file${local.name_suffix}"
   location                            = var.location
   resource_group_name                 = var.resource_group_name
   log_analytics_workspace_resource_id = module.log_analytics_workspace.log_analytics_workspace_resource_id
@@ -128,7 +128,7 @@ module "virtual_network" {
 # ------------------------------------------------------------------------------------------------------
 module "logic_app_app_service_plan" {
   source                 = "./modules/app_service_plan"
-  name_suffix            = "logic-${local.resource_token}"
+  name_suffix            = "logic-${local.name_suffix}"
   location               = var.location
   resource_group_name    = var.resource_group_name
   os_type                = "Windows"
@@ -140,7 +140,7 @@ module "logic_app_app_service_plan" {
 
 module "function_app_app_service_plan" {
   source                 = "./modules/app_service_plan"
-  name_suffix            = "function-${local.resource_token}"
+  name_suffix            = "function-${local.name_suffix}"
   location               = var.location
   resource_group_name    = var.resource_group_name
   os_type                = "Linux"
@@ -159,7 +159,7 @@ module "key_vault" {
   location                   = var.location
   resource_group_name        = var.resource_group_name
   tags                       = local.tags
-  name_suffix                = local.resource_token
+  name_suffix                = local.name_suffix
   principal_id               = var.principal_id
   access_policy_object_ids   = []
   secrets                    = []
@@ -175,7 +175,7 @@ module "function_app" {
   source                        = "./modules/function_app"
   location                      = var.location
   resource_group_name           = var.resource_group_name
-  name_suffix                   = local.function_app_name
+  name_suffix                   = local.name_suffix
   service_plan_resource_id      = module.function_app_app_service_plan.resource_id
   tags                          = merge(local.tags, { "azd-service-name" = "function-app" })
   private_endpoint_subnet_id    = module.virtual_network.private_endpoint_subnet_resource_id
@@ -191,7 +191,7 @@ module "function_app" {
     "WEBSITE_CONTENTSHARE"                     = local.function_app_name
     "WEBSITE_DNS_SERVER"                       = var.function_app.website_dns_server
     "WEBSITE_CONTENTOVERVNET"                  = "1"
-    "FUNCTIONS_WORKER_RUNTIME"                 = "python"
+    "FUNCTIONS_WORKER_RUNTIME"                 = "java"
   }
   log_analytics_workspace_id             = module.log_analytics_workspace.log_analytics_workspace_resource_id
   application_insights_connection_string = module.application_insights.application_insights_connection_string
@@ -207,7 +207,7 @@ module "logic_app" {
   source                        = "./modules/logic_app"
   location                      = var.location
   resource_group_name           = var.resource_group_name
-  name_suffix                   = local.logic_app_name
+  name_suffix                   = local.name_suffix
   service_plan_resource_id      = module.logic_app_app_service_plan.resource_id
   tags                          = merge(local.tags, { "azd-service-name" = "logic-app" })
   private_endpoint_subnet_id    = module.virtual_network.private_endpoint_subnet_resource_id
@@ -232,7 +232,7 @@ module "logic_app" {
 # ------------------------------------------------------------------------------------------------------
 module "event_hub_namespace" {
   source                        = "./modules/event_hub"
-  name_suffix                   = local.resource_token
+  name_suffix                   = local.name_suffix
   location                      = var.location
   resource_group_name           = var.resource_group_name
   tags                          = local.tags
@@ -250,7 +250,7 @@ module "event_hub_namespace" {
 
 module "nsg_private_endpoint" {
   source              = "./modules/network_security_group"
-  name_suffix         = "pe-${local.resource_token}"
+  name_suffix         = "pe-${local.name_suffix}"
   location            = var.location
   resource_group_name = var.resource_group_name
   security_rules      = {}
@@ -264,7 +264,7 @@ resource "azurerm_subnet_network_security_group_association" "private_endpoint" 
 
 module "nsg_apim" {
   source              = "./modules/network_security_group"
-  name_suffix         = "apim-${local.resource_token}"
+  name_suffix         = "apim-${local.name_suffix}"
   location            = var.location
   resource_group_name = var.resource_group_name
   tags                = local.tags
@@ -277,7 +277,7 @@ resource "azurerm_subnet_network_security_group_association" "apim" {
 
 module "nsg_logic_app" {
   source              = "./modules/network_security_group"
-  name_suffix         = "logic-app-${local.resource_token}"
+  name_suffix         = "logic-app-${local.name_suffix}"
   location            = var.location
   resource_group_name = var.resource_group_name
   tags                = local.tags
@@ -290,7 +290,7 @@ resource "azurerm_subnet_network_security_group_association" "logic_app" {
 
 module "nsg_function_app" {
   source              = "./modules/network_security_group"
-  name_suffix         = "function-app-${local.resource_token}"
+  name_suffix         = "function-app-${local.name_suffix}"
   location            = var.location
   resource_group_name = var.resource_group_name
   tags                = local.tags
@@ -307,7 +307,7 @@ resource "azurerm_subnet_network_security_group_association" "function_app" {
 
 module "api_management" {
   source                                   = "./modules/api_management"
-  name_suffix                              = "apim-${local.resource_token}"
+  name_suffix                              = local.name_suffix
   location                                 = var.location
   resource_group_name                      = var.resource_group_name
   tags                                     = local.tags
