@@ -4,12 +4,12 @@ module "naming" {
   suffix  = [var.name_suffix]
 }
 
-module "servicebus" {
+module "service_bus" {
   source              = "Azure/avm-res-servicebus-namespace/azurerm"
   version             = "0.4.0"
   sku                 = var.sku
-  resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
   name                = module.naming.servicebus_namespace.name
   private_endpoints = {
     primary = {
@@ -31,14 +31,15 @@ module "servicebus" {
   }
   public_network_access_enabled = false
   network_rule_config = {
-    default_action           = "Deny"
+    #default_action           = "Deny"
     trusted_services_allowed = true
   }
   role_assignments = {
     managed_identity_servicebus_owner = {
-      role_definition_name = "Azure Service Bus Data Owner"
-      principal_id         = var.managed_identity_id
-      principal_type       = "ServicePrincipal"
+      role_definition_id_or_name = "Azure Service Bus Data Owner"
+      principal_id               = var.managed_identity_principal_id
+      principal_type             = "ServicePrincipal"
     }
   }
+  private_endpoints_manage_dns_zone_group = false
 }

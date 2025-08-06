@@ -60,7 +60,7 @@ module "private_endpoint" {
   name                           = module.naming.private_endpoint.name_unique
   location                       = var.location
   resource_group_name            = var.resource_group_name
-  network_interface_name         = "nic-${module.naming.private_endpoint.name_unique}"
+  network_interface_name         = "nic-apim-${module.naming.private_endpoint.name_unique}"
   private_connection_resource_id = azurerm_api_management.api_management.id
   subnet_resource_id             = var.private_endpoint_subnet_id
   subresource_names              = ["Gateway"]

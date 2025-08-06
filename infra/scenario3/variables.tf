@@ -90,6 +90,22 @@ variable "sql" {
     server_version                       = string
     azuread_administrator_login_username = string
     azuread_administrator_object_id      = string
+    databases = list(object({
+      name         = string
+      sku_name     = string
+      max_size_gb  = number
+      license_type = string
+      short_term_retention_policy = object({
+        retention_days           = number
+        backup_interval_in_hours = number
+      })
+      long_term_retention_policy = object({
+        weekly_retention  = string
+        monthly_retention = string
+        yearly_retention  = string
+        week_of_year      = number
+      })
+    }))
   })
 }
 

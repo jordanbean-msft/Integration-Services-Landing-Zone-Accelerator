@@ -352,4 +352,24 @@ module "azure_sql" {
   managed_identity_principal_id        = module.managed_identity.user_assigned_identity_principal_id
   private_endpoint_subnet_id           = module.virtual_network.private_endpoint_subnet_resource_id
   tenant_id                            = data.azurerm_client_config.current.tenant_id
+  databases                            = var.sql.databases
+  zone_redundancy_enabled              = var.zone_redundancy_enabled
+}
+
+# ------------------------------------------------------------------------------------------------------
+# Service Bus
+# ------------------------------------------------------------------------------------------------------
+
+module "service_bus" {
+  source                        = "./modules/service_bus"
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  name_suffix                   = local.name_suffix
+  tags                          = local.tags
+  sku                           = var.service_bus.sku_name
+  capacity                      = var.service_bus.sku_capacity
+  private_endpoint_subnet_id    = module.virtual_network.private_endpoint_subnet_resource_id
+  managed_identity_id           = module.managed_identity.user_assigned_identity_id
+  managed_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
+  log_analytics_workspace_id    = module.log_analytics_workspace.log_analytics_workspace_resource_id
 }

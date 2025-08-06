@@ -57,3 +57,28 @@ variable "tenant_id" {
   description = "The tenant id for the Azure AD administrator"
   type        = string
 }
+
+variable "databases" {
+  description = "A list of database configurations"
+  type = list(object({
+    name         = string
+    sku_name     = string
+    max_size_gb  = number
+    license_type = string
+    short_term_retention_policy = object({
+      retention_days           = number
+      backup_interval_in_hours = number
+    })
+    long_term_retention_policy = object({
+      weekly_retention  = string
+      monthly_retention = string
+      yearly_retention  = string
+      week_of_year      = number
+    })
+  }))
+}
+
+variable "zone_redundancy_enabled" {
+  description = "Whether zone redundancy is enabled for the SQL databases"
+  type        = bool
+}

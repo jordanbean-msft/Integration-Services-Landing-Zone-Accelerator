@@ -32,12 +32,25 @@ module "azure_sql" {
   primary_user_assigned_identity_id = var.managed_identity_id
   public_network_access_enabled     = false
   databases = {
-
+    for db in var.databases : db.name => {
+      name         = db.name
+      sku_name     = db.sku_name
+      max_size_gb  = db.max_size_gb
+      license_type = db.license_type
+      short_term_retention_policy = {
+        retention_days           = db.short_term_retention_policy.retention_days
+        backup_interval_in_hours = db.short_term_retention_policy.backup_interval_in_hours
+      }
+      long_term_retention_policy = {
+        weekly_retention  = db.long_term_retention_policy.weekly_retention
+        monthly_retention = db.long_term_retention_policy.monthly_retention
+        yearly_retention  = db.long_term_retention_policy.yearly_retention
+        week_of_year      = db.long_term_retention_policy.week_of_year
+      }
+      zone_redundant = var.zone_redundancy_enabled
+    }
   }
   private_endpoints_manage_dns_zone_group = false
-  role_assignments = {
-
-  }
   azuread_administrator = {
     azuread_authentication_only = true
     login_username              = var.azuread_administrator_login_username
