@@ -5,7 +5,7 @@ on:
     branches: [$default-branch]
     paths:
       - "infra/scenario3/**"
-      - ".github/workflows/scenario3/deploy.yaml"
+      - ".github/workflows/deploy.yaml"
   pull_request:
   workflow_dispatch:
 
@@ -17,7 +17,8 @@ jobs:
     name: "Terraform"
     runs-on: ubuntu-latest
     environment: scenario3
-    env: AZURE_APIM_PUBLISHER_EMAIL=${{ vars.AZURE_APIM_PUBLISHER_EMAIL }}
+    env:
+      AZURE_APIM_PUBLISHER_EMAIL=${{ vars.AZURE_APIM_PUBLISHER_EMAIL }}
       AZURE_APIM_PUBLISHER_EMAIL=${{ vars.AZURE_APIM_PUBLISHER_EMAIL }}
       AZURE_APIM_PUBLISHER_NAME=${{ vars.AZURE_APIM_PUBLISHER_NAME }}
       AZURE_APIM_SUBNET_NAME=${{ vars.AZURE_APIM_SUBNET_NAME }}
@@ -47,11 +48,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+      # Install the latest version of Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
-        with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Change to Terraform working directory
         run: cd infra/scenario3
