@@ -5,7 +5,7 @@ on:
     branches: [$default-branch]
     paths:
       - "infra/scenario3/**"
-      - ".github/scenario3/deploy.yaml"
+      - ".github/workflows/scenario3/deploy.yaml"
   pull_request:
   workflow_dispatch:
 
