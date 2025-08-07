@@ -54,7 +54,13 @@ jobs:
 
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+          -input=false
+          -backend-config="storage_account_name=${{ env.RS_STORAGE_ACCOUNT }}" \
+          -backend-config="container_name=${{ env.RS_CONTAINER_NAME }}" \
+          -backend-config="key=azd/azd.tfstate" \
+          -backend-config="resource_group_name=${{ env.RS_RESOURCE_GROUP }}"
         working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
       # Checks that all Terraform configuration files adhere to a canonical format
