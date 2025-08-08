@@ -33,19 +33,12 @@ module "function_app" {
   managed_identities = {
     user_assigned_resource_ids = [var.managed_identity_id]
   }
-  virtual_network_subnet_id        = var.vnet_function_subnet_id
   storage_account_name             = var.storage_account_name
   storage_account_share_name       = var.storage_account_share_name
   storage_account_access_key       = var.storage_account_access_key
   public_network_access_enabled    = false
   all_child_resources_inherit_tags = false
-  private_endpoints = {
-    primary = {
-      subnet_resource_id = var.private_endpoint_subnet_id
-    }
-  }
-  private_endpoints_manage_dns_zone_group = false
-  enable_application_insights             = false
+  enable_application_insights      = false
   # diagnostic_settings = {
   #   logging = {
   #     name                  = "function-logging"

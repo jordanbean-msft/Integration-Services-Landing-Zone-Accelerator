@@ -53,8 +53,7 @@ variable "network" {
     virtual_network_resource_group_name = string
     private_endpoint_subnet_name        = string
     apim_subnet_name                    = string
-    logic_app_subnet_name               = string
-    function_app_subnet_name            = string
+    app_service_environment_subnet_name = string
   })
 }
 

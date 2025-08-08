@@ -23,16 +23,6 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "private_endpoint_subnet_id" {
-  description = "The subnet id to deploy the private endpoint into."
-  type        = string
-}
-
-variable "vnet_function_subnet_id" {
-  description = "The subnet id to deploy the Azure Function into."
-  type        = string
-}
-
 variable "managed_identity_principal_id" {
   description = "The principal id of the managed identity"
   type        = string
@@ -67,7 +57,6 @@ variable "application_insights_key" {
   description = "The key for Application Insights"
   type        = string
 }
-
 
 variable "storage_account_share_name" {
   description = "The name of the storage account share"

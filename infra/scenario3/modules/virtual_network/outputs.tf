@@ -8,12 +8,7 @@ output "apim_subnet_resource_id" {
   value       = var.apim_subnet_resource_id
 }
 
-output "logic_app_subnet_resource_id" {
-  description = "The resource ID of the subnet for the Logic App"
-  value       = var.logic_app_subnet_resource_id
-}
-
-output "function_app_subnet_resource_id" {
-  description = "The resource ID of the subnet for the Function App"
-  value       = var.function_app_subnet_resource_id
+output "app_service_environment_subnet_resource_id" {
+  description = "The resource ID of the subnet for the App Service Environment"
+  value       = var.app_service_environment_subnet_resource_id
 }

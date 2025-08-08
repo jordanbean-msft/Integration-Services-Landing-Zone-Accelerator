@@ -18,14 +18,8 @@ data "azurerm_subnet" "apim_subnet" {
   resource_group_name  = var.network.virtual_network_resource_group_name
 }
 
-data "azurerm_subnet" "logic_app_subnet" {
-  name                 = var.network.logic_app_subnet_name
-  virtual_network_name = var.network.virtual_network_name
-  resource_group_name  = var.network.virtual_network_resource_group_name
-}
-
-data "azurerm_subnet" "function_app_subnet" {
-  name                 = var.network.function_app_subnet_name
+data "azurerm_subnet" "app_service_environment_subnet" {
+  name                 = var.network.app_service_environment_subnet_name
   virtual_network_name = var.network.virtual_network_name
   resource_group_name  = var.network.virtual_network_resource_group_name
 }
@@ -116,11 +110,25 @@ module "file_storage_account" {
 # ------------------------------------------------------------------------------------------------------
 
 module "virtual_network" {
-  source                              = "./modules/virtual_network"
-  private_endpoint_subnet_resource_id = data.azurerm_subnet.private_endpoint_subnet.id
-  apim_subnet_resource_id             = data.azurerm_subnet.apim_subnet.id
-  logic_app_subnet_resource_id        = data.azurerm_subnet.logic_app_subnet.id
-  function_app_subnet_resource_id     = data.azurerm_subnet.function_app_subnet.id
+  source                                     = "./modules/virtual_network"
+  private_endpoint_subnet_resource_id        = data.azurerm_subnet.private_endpoint_subnet.id
+  apim_subnet_resource_id                    = data.azurerm_subnet.apim_subnet.id
+  app_service_environment_subnet_resource_id = data.azurerm_subnet.app_service_environment_subnet.id
+}
+
+# ------------------------------------------------------------------------------------------------------
+# Deploy App Service Environment
+# ------------------------------------------------------------------------------------------------------
+module "app_service_environment" {
+  source                     = "./modules/app_service_environment"
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  name_suffix                = local.name_suffix
+  tags                       = local.tags
+  log_analytics_workspace_id = module.log_analytics_workspace.log_analytics_workspace_resource_id
+  managed_identity_id        = module.managed_identity.user_assigned_identity_id
+  subnet_resource_id         = module.virtual_network.app_service_environment_subnet_resource_id
+  zone_balancing_enabled     = var.zone_redundancy_enabled
 }
 
 # ------------------------------------------------------------------------------------------------------
@@ -178,8 +186,6 @@ module "function_app" {
   name_suffix                   = local.name_suffix
   service_plan_resource_id      = module.function_app_app_service_plan.resource_id
   tags                          = merge(local.tags, { "azd-service-name" = "function-app" })
-  private_endpoint_subnet_id    = module.virtual_network.private_endpoint_subnet_resource_id
-  vnet_function_subnet_id       = module.virtual_network.function_app_subnet_resource_id
   managed_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
   managed_identity_id           = module.managed_identity.user_assigned_identity_id
   storage_account_name          = module.function_app_storage_account.storage_account_name
@@ -210,8 +216,6 @@ module "logic_app" {
   name_suffix                   = local.name_suffix
   service_plan_resource_id      = module.logic_app_app_service_plan.resource_id
   tags                          = merge(local.tags, { "azd-service-name" = "logic-app" })
-  private_endpoint_subnet_id    = module.virtual_network.private_endpoint_subnet_resource_id
-  vnet_logic_app_subnet_id      = module.virtual_network.logic_app_subnet_resource_id
   managed_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
   managed_identity_id           = module.managed_identity.user_assigned_identity_id
   storage_account_name          = module.logic_app_storage_account.storage_account_name
@@ -280,6 +284,19 @@ resource "azurerm_subnet_network_security_group_association" "apim" {
   network_security_group_id = module.nsg_apim.network_security_group_id
 }
 
+module "nsg_app_service_environment" {
+  source              = "./modules/network_security_group"
+  name_suffix         = "app-service-environment-${local.name_suffix}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tags                = local.tags
+}
+
+resource "azurerm_subnet_network_security_group_association" "app_service_environment" {
+  subnet_id                 = module.virtual_network.app_service_environment_subnet_resource_id
+  network_security_group_id = module.nsg_app_service_environment.network_security_group_id
+}
+
 module "nsg_logic_app" {
   source              = "./modules/network_security_group"
   name_suffix         = "logic-app-${local.name_suffix}"
@@ -288,22 +305,12 @@ module "nsg_logic_app" {
   tags                = local.tags
 }
 
-resource "azurerm_subnet_network_security_group_association" "logic_app" {
-  subnet_id                 = module.virtual_network.logic_app_subnet_resource_id
-  network_security_group_id = module.nsg_logic_app.network_security_group_id
-}
-
 module "nsg_function_app" {
   source              = "./modules/network_security_group"
   name_suffix         = "function-app-${local.name_suffix}"
   location            = var.location
   resource_group_name = var.resource_group_name
   tags                = local.tags
-}
-
-resource "azurerm_subnet_network_security_group_association" "function_app" {
-  subnet_id                 = module.virtual_network.function_app_subnet_resource_id
-  network_security_group_id = module.nsg_function_app.network_security_group_id
 }
 
 # ------------------------------------------------------------------------------------------------------

@@ -8,12 +8,7 @@ variable "apim_subnet_resource_id" {
   type        = string
 }
 
-variable "logic_app_subnet_resource_id" {
-  description = "The resource ID of the subnet for the Logic App"
-  type        = string
-}
-
-variable "function_app_subnet_resource_id" {
-  description = "The resource ID of the subnet for the Function App"
+variable "app_service_environment_subnet_resource_id" {
+  description = "The resource ID of the subnet for the App Service Environment"
   type        = string
 }

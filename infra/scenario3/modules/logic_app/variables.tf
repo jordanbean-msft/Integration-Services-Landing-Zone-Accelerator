@@ -23,16 +23,6 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "private_endpoint_subnet_id" {
-  description = "The subnet id to deploy the private endpoint into."
-  type        = string
-}
-
-variable "vnet_logic_app_subnet_id" {
-  description = "The subnet id to deploy the Azure Logic App into."
-  type        = string
-}
-
 variable "managed_identity_principal_id" {
   description = "The principal id of the managed identity"
   type        = string
