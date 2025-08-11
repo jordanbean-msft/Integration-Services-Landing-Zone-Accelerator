@@ -355,7 +355,7 @@ MigrationBackup/
 
 scratch/*
 
-**/main.tfvars.json
+# **/main.tfvars.json
 
 .env.local
 
