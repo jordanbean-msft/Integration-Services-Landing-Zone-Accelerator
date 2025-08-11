@@ -93,13 +93,33 @@ jobs:
         working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
       # Generates an execution plan for Terraform
+
+
+      # Generate terraform.tfvars.json from main.tfvars.json with env substitution
+      - name: Generate terraform.tfvars.json
+        run: |
+          chmod +x generate-tfvars.sh
+          ./generate-tfvars.sh
+        working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
+
+      # Print terraform.tfvars.json to GitHub Actions debug output
+      - name: Print terraform.tfvars.json
+        run: |
+          echo '::debug::--- terraform.tfvars.json ---'
+          while IFS= read -r line; do
+            echo "::debug::${line}"
+          done < terraform.tfvars.json
+          echo '::debug::----------------------------'
+        working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
+
+      # Generates an execution plan for Terraform
       - name: Terraform Plan
-        run: terraform plan -input=false -var-file=main.tfvars.json
+        run: terraform plan -input=false
         working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
       # On push to $default-branch, build or change infrastructure according to Terraform configuration files
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/$default-branch' && github.event_name == 'push'
-      #   run: terraform apply -auto-approve -input=false -var-file=main.tfvars.json
+      #   run: terraform apply -auto-approve -input=false
       #   working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
