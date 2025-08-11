@@ -38,6 +38,7 @@ jobs:
       RS_CONTAINER_NAME: ${{ vars.RS_CONTAINER_NAME }}
       RS_RESOURCE_GROUP: ${{ vars.RS_RESOURCE_GROUP }}
       RS_STORAGE_ACCOUNT: ${{ vars.RS_STORAGE_ACCOUNT }}
+      ARM_USE_AZUREAD: true
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -64,30 +65,45 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
 
-      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc. (using Azure CLI)
       - name: Terraform Init
-        run: |
-          terraform init \
-          -input=false \
-          -backend-config="storage_account_name=${{ env.RS_STORAGE_ACCOUNT }}" \
-          -backend-config="container_name=${{ env.RS_CONTAINER_NAME }}" \
-          -backend-config="key=azd/azd.tfstate" \
-          -backend-config="resource_group_name=${{ env.RS_RESOURCE_GROUP }}"
-        working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            cd ${{ env.INFRA_WORKING_DIRECTORY }}
+            terraform init \
+              -input=false \
+              -backend-config="storage_account_name=${{ env.RS_STORAGE_ACCOUNT }}" \
+              -backend-config="container_name=${{ env.RS_CONTAINER_NAME }}" \
+              -backend-config="key=azd/azd.tfstate" \
+              -backend-config="resource_group_name=${{ env.RS_RESOURCE_GROUP }}"
 
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format
         run: terraform fmt -check
         working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
-      # Generates an execution plan for Terraform
-      - name: Terraform Plan
-        run: terraform plan -input=false
-        working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
-        # On push to $default-branch, build or change infrastructure according to Terraform configuration files
-        # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+      # Generates an execution plan for Terraform (using Azure CLI)
+      - name: Terraform Plan
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            cd ${{ env.INFRA_WORKING_DIRECTORY }}
+            terraform plan -input=false
+
+
+        # On push to $default-branch, build or change infrastructure according to Terraform configuration files (using Azure CLI)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/$default-branch' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
-        working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            cd ${{ env.INFRA_WORKING_DIRECTORY }}
+            terraform apply -auto-approve -input=false
