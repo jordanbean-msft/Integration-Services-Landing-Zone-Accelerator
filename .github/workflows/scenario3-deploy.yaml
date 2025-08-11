@@ -68,7 +68,7 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-          -input=false
+          -input=false \
           -backend-config="storage_account_name=${{ env.RS_STORAGE_ACCOUNT }}" \
           -backend-config="container_name=${{ env.RS_CONTAINER_NAME }}" \
           -backend-config="key=azd/azd.tfstate" \
