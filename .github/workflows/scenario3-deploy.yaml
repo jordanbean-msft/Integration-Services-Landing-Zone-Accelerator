@@ -15,7 +15,8 @@ permissions:
 jobs:
   terraform:
     name: "Terraform"
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     environment: scenario3
     env:
       INFRA_WORKING_DIRECTORY: "infra/scenario3"
