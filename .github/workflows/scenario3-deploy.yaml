@@ -77,39 +77,30 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
 
-      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc. (using Azure CLI)
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            cd ${{ env.INFRA_WORKING_DIRECTORY }}
-            terraform init \
-              -input=false \
-              -backend-config="storage_account_name=${{ env.RS_STORAGE_ACCOUNT }}" \
-              -backend-config="container_name=${{ env.RS_CONTAINER_NAME }}" \
-              -backend-config="key=azd/azd.tfstate" \
-              -backend-config="resource_group_name=${{ env.RS_RESOURCE_GROUP }}"
+        run: |
+          terraform init \
+          -input=false \
+          -backend-config="storage_account_name=${{ env.RS_STORAGE_ACCOUNT }}" \
+          -backend-config="container_name=${{ env.RS_CONTAINER_NAME }}" \
+          -backend-config="key=azd/azd.tfstate" \
+          -backend-config="resource_group_name=${{ env.RS_RESOURCE_GROUP }}"
+        working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format
         run: terraform fmt -check
         working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
-
-      # Generates an execution plan for Terraform (using Azure CLI)
+      # Generates an execution plan for Terraform
       - name: Terraform Plan
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            cd ${{ env.INFRA_WORKING_DIRECTORY }}
-            terraform plan -input=false
+        run: terraform plan -input=false
+        working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
-
-        # On push to $default-branch, build or change infrastructure according to Terraform configuration files (using Azure CLI)
+        # On push to $default-branch, build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
         if: github.ref == 'refs/heads/$default-branch' && github.event_name == 'push'
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            cd ${{ env.INFRA_WORKING_DIRECTORY }}
-            terraform apply -auto-approve -input=false
+        run: terraform apply -auto-approve -input=false
+        working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
+
