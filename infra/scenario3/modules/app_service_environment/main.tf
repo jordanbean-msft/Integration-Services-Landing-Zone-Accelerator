@@ -20,6 +20,8 @@ module "app_service_environment" {
   managed_identities = {
     user_assigned_resource_ids = [var.managed_identity_id]
   }
-  subnet_id      = var.subnet_resource_id
-  zone_redundant = var.zone_balancing_enabled
+  subnet_id                    = var.subnet_resource_id
+  zone_redundant               = var.zone_balancing_enabled
+  internal_load_balancing_mode = "Web, Publishing"
+
 }

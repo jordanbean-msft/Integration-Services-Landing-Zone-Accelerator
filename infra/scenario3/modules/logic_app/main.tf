@@ -33,7 +33,6 @@ module "logic_app" {
     vnet_route_all_enabled                 = true
     application_insights_connection_string = var.application_insights_connection_string
     application_insights_key               = var.application_insights_key
-    runtime_scale_monitoring_enabled       = true
     always_on                              = true
   }
   storage_account_name             = var.storage_account_name

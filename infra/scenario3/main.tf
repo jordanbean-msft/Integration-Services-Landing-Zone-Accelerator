@@ -135,27 +135,29 @@ module "app_service_environment" {
 # Deploy App Service Plans
 # ------------------------------------------------------------------------------------------------------
 module "logic_app_app_service_plan" {
-  source                 = "./modules/app_service_plan"
-  name_suffix            = "logic-${local.name_suffix}"
-  location               = var.location
-  resource_group_name    = var.resource_group_name
-  os_type                = "Windows"
-  sku_name               = var.logic_app.sku_name
-  tags                   = local.tags
-  zone_balancing_enabled = var.zone_redundancy_enabled
-  worker_count           = var.logic_app.worker_count
+  source                     = "./modules/app_service_plan"
+  name_suffix                = "logic-${local.name_suffix}"
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  os_type                    = "Windows"
+  sku_name                   = var.logic_app.sku_name
+  tags                       = local.tags
+  zone_balancing_enabled     = var.zone_redundancy_enabled
+  worker_count               = var.logic_app.worker_count
+  app_service_environment_id = module.app_service_environment.id
 }
 
 module "function_app_app_service_plan" {
-  source                 = "./modules/app_service_plan"
-  name_suffix            = "function-${local.name_suffix}"
-  location               = var.location
-  resource_group_name    = var.resource_group_name
-  os_type                = "Linux"
-  sku_name               = var.function_app.sku_name
-  tags                   = local.tags
-  zone_balancing_enabled = var.zone_redundancy_enabled
-  worker_count           = var.function_app.worker_count
+  source                     = "./modules/app_service_plan"
+  name_suffix                = "function-${local.name_suffix}"
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  os_type                    = "Linux"
+  sku_name                   = var.function_app.sku_name
+  tags                       = local.tags
+  zone_balancing_enabled     = var.zone_redundancy_enabled
+  worker_count               = var.function_app.worker_count
+  app_service_environment_id = module.app_service_environment.id
 }
 
 # ------------------------------------------------------------------------------------------------------
@@ -226,10 +228,7 @@ module "logic_app" {
     "APPLICATIONINSIGHTS_CONNECTIONSTRING" : module.application_insights.application_insights_connection_string
     "APPINSIGHTS_INSTRUMENTATIONKEY" : module.application_insights.application_insights_key
     "ApplicationInsightsAgent_EXTENSION_VERSION" : "~2"
-    "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = module.logic_app_storage_account.storage_account_connection_string
-    "WEBSITE_CONTENTSHARE"                     = local.logic_app_name
     "FUNCTIONS_WORKER_RUNTIME" : "dotnet"
-    "FUNCTIONS_EXTENSION_VERSION" : "~4"
   }
   log_analytics_workspace_id             = module.log_analytics_workspace.log_analytics_workspace_resource_id
   application_insights_connection_string = module.application_insights.application_insights_connection_string
@@ -277,6 +276,217 @@ module "nsg_apim" {
   location            = var.location
   resource_group_name = var.resource_group_name
   tags                = local.tags
+  security_rules = {
+    rule_100_inbound = {
+      name                       = "AllowManagementEndpointForAzurePortalInbound"
+      priority                   = 100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "ApiManagement"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "3443"
+    }
+    rule_110_inbound = {
+      name                       = "AllowExternalRedisCacheInbound"
+      priority                   = 110
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "6380"
+    }
+    rule_120_inbound = {
+      name                       = "AllowInternalRedisCacheInbound"
+      priority                   = 120
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "6381-6383"
+    }
+    rule_130_inbound = {
+      name                       = "AllowSyncCountersForRateLimitingInbound"
+      priority                   = 130
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Udp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "4290"
+    }
+    rule_140_inbound = {
+      name                       = "AllowAzureInfrastructureLoadBalancerInbound"
+      priority                   = 140
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "AzureLoadBalancer"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "6390"
+    }
+    rule_150_inbound = {
+      name                       = "AllowMonitoringOfIndividualMachineHealthInbound"
+      priority                   = 150
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "AzureLoadBalancer"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "6391"
+    }
+    rule_100_outbound = {
+      name                       = "AllowValidationAndMgmtOfMicrosoftAndCustomerCertificatesOutbound"
+      priority                   = 100
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "Internet"
+      destination_port_range     = "80"
+    }
+    rule_110_outbound = {
+      name                       = "AllowDependencyOnAzureStorageOutbound"
+      priority                   = 110
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "Storage"
+      destination_port_range     = "443"
+    }
+    rule_120_outbound = {
+      name                       = "AllowMicrosoftEntraGraphAndKeyVaultOutbound"
+      priority                   = 120
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "AzureActiveDirectory"
+      destination_port_range     = "443"
+    }
+    rule_130_outbound = {
+      name                       = "AllowManagedConnectorsOutbound"
+      priority                   = 130
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "AzureConnectors"
+      destination_port_range     = "443"
+    }
+    rule_140_outbound = {
+      name                       = "AllowAzureSQLOutbound"
+      priority                   = 140
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "Sql"
+      destination_port_range     = "1433"
+    }
+    rule_150_outbound = {
+      name                       = "AllowKeyVaultOutbound"
+      priority                   = 150
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "AzureKeyVault"
+      destination_port_range     = "443"
+    }
+    rule_160_outbound = {
+      name                       = "AllowEventHubAndMonitorOutbound"
+      priority                   = 160
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "EventHub"
+      destination_port_ranges    = ["5671", "5672", "443"]
+    }
+    rule_170_outbound = {
+      name                       = "AllowAzureFileShareForGitOutbound"
+      priority                   = 170
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "Storage"
+      destination_port_range     = "445"
+    }
+    rule_180_outbound = {
+      name                       = "AllowPublishDiagnosticsAndAppInsightsOutbound"
+      priority                   = 180
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "AzureMonitor"
+      destination_port_ranges    = ["1886", "443"]
+    }
+    rule_190_outbound = {
+      name                       = "AllowExternalAzureCacheOutbound"
+      priority                   = 190
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "6380"
+    }
+    rule_200_outbound = {
+      name                       = "AllowInternalAzureCacheOutbound"
+      priority                   = 200
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "6381-6383"
+    }
+    rule_220_outbound = {
+      name                       = "AllowSyncCountersOutbound"
+      priority                   = 220
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Udp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "4290"
+    }
+    rule_230_outbound = {
+      name                       = "AllowDnsOutbound"
+      priority                   = 230
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Udp"
+      source_address_prefix      = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_address_prefix = "VirtualNetwork"
+      destination_port_range     = "53"
+    }
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "apim" {

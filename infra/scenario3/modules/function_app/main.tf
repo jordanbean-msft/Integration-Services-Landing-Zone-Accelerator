@@ -26,9 +26,9 @@ module "function_app" {
     application_insights_key               = var.application_insights_key
     vnet_route_all_enabled                 = true
     linux_fx_version                       = "Java|21"
-    runtime_scale_monitoring_enabled       = true
     always_on                              = true
   }
+  vnet_image_pull_enabled                  = true
   ftp_publish_basic_authentication_enabled = false
   managed_identities = {
     user_assigned_resource_ids = [var.managed_identity_id]

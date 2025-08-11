@@ -39,5 +39,9 @@ variable "zone_balancing_enabled" {
 variable "worker_count" {
   description = "The number of workers to allocate for this App Service Plan."
   type        = number
-  default     = 3
+}
+
+variable "app_service_environment_id" {
+  description = "The ID of the App Service Environment to associate with this App Service Plan."
+  type        = string
 }

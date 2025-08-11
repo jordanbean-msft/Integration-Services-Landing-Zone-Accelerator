@@ -22,7 +22,8 @@ module "eventhub_namespace" {
       subresource_name   = "namespace"
     }
   }
-  public_network_access_enabled = false
+  private_endpoints_manage_dns_zone_group = false
+  public_network_access_enabled           = false
   role_assignments = {
     managed_identity_event_hub_sender = {
       role_definition_id_or_name = "Azure Event Hubs Data Sender"

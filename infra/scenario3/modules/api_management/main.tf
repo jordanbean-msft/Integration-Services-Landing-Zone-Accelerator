@@ -80,7 +80,7 @@ module "naming" {
 module "api_management" {
   source              = "Azure/avm-res-apimanagement-service/azurerm"
   version             = "0.0.4"
-  name                = azurecaf_name.api_management_name.result
+  name                = module.naming.api_management.name
   location            = var.location
   resource_group_name = var.resource_group_name
   publisher_email     = var.publisher_email
@@ -95,8 +95,18 @@ module "api_management" {
   managed_identities = {
     user_assigned_identity_id = [var.user_assigned_identity_id]
   }
-  public_network_access_enabled = false
+  public_network_access_enabled = true
   virtual_network_subnet_id     = var.api_management_subnet_id
   virtual_network_type          = "Internal"
-  zones                         = var.zones
+  zones                         = (var.sku_name == "Premium") ? var.zones : null
 }
+
+# resource "azapi_update_resource" "update_api_management" {
+#   type        = "Microsoft.ApiManagement/service@2024-06-01-preview"
+#   resource_id = module.api_management.resource_id
+#   body = {
+#     properties = {
+#       publicNetworkAccess = "Disabled"
+#     }
+#   }
+# }

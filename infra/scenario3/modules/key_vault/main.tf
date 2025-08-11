@@ -48,4 +48,5 @@ module "key_vault" {
       subnet_resource_id = var.subnet_id
     }
   }
+  private_endpoints_manage_dns_zone_group = false
 }
