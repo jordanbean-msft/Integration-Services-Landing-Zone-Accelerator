@@ -130,3 +130,10 @@ variable "app_configuration" {
     sku = string
   })
 }
+
+variable "api_center" {
+  description = "Configuration for Azure API Center"
+  type = object({
+    location = string
+  })
+}

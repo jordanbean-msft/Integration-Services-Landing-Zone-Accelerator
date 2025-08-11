@@ -609,3 +609,18 @@ module "app_configuration" {
   log_analytics_workspace_id    = module.log_analytics_workspace.log_analytics_workspace_resource_id
   key_values                    = {}
 }
+
+# ------------------------------------------------------------------------------------------------------
+# API Center
+# ------------------------------------------------------------------------------------------------------
+
+module "api_center" {
+  source                        = "./modules/api_center"
+  location                      = var.api_center.location
+  resource_group_name           = var.resource_group_name
+  name_suffix                   = local.name_suffix
+  tags                          = local.tags
+  managed_identity_id           = module.managed_identity.user_assigned_identity_id
+  managed_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
+  log_analytics_workspace_id    = module.log_analytics_workspace.log_analytics_workspace_resource_id
+}

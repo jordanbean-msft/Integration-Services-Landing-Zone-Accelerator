@@ -93,9 +93,6 @@ jobs:
         run: terraform fmt -check
         working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
-      # Generates an execution plan for Terraform
-
-
       # Generate terraform.tfvars.json from main.tfvars.json with env substitution
       - name: Generate terraform.tfvars.json
         run: |
