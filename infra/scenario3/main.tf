@@ -119,6 +119,7 @@ module "virtual_network" {
 # ------------------------------------------------------------------------------------------------------
 # Deploy App Service Environment
 # ------------------------------------------------------------------------------------------------------
+
 module "app_service_environment" {
   source                     = "./modules/app_service_environment"
   location                   = var.location
