@@ -590,3 +590,21 @@ module "service_bus" {
   managed_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
   log_analytics_workspace_id    = module.log_analytics_workspace.log_analytics_workspace_resource_id
 }
+
+# ------------------------------------------------------------------------------------------------------
+# App Configuration
+# ------------------------------------------------------------------------------------------------------
+
+module "app_configuration" {
+  source                        = "./modules/app_configuration"
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  name_suffix                   = "${local.name_suffix}1"
+  tags                          = local.tags
+  sku                           = var.app_configuration.sku
+  private_endpoint_subnet_id    = module.virtual_network.private_endpoint_subnet_resource_id
+  managed_identity_id           = module.managed_identity.user_assigned_identity_id
+  managed_identity_principal_id = module.managed_identity.user_assigned_identity_principal_id
+  log_analytics_workspace_id    = module.log_analytics_workspace.log_analytics_workspace_resource_id
+  key_values                    = {}
+}

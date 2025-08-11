@@ -123,3 +123,10 @@ variable "event_hub" {
     capacity = number
   })
 }
+
+variable "app_configuration" {
+  description = "Configuration for Azure App Configuration"
+  type = object({
+    sku = string
+  })
+}

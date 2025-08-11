@@ -94,12 +94,12 @@ jobs:
 
       # Generates an execution plan for Terraform
       - name: Terraform Plan
-        run: terraform plan -input=false
+        run: terraform plan -input=false -var-file=main.tfvars.json
         working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
-        # On push to $default-branch, build or change infrastructure according to Terraform configuration files
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/$default-branch' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
-        working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
+      # On push to $default-branch, build or change infrastructure according to Terraform configuration files
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/$default-branch' && github.event_name == 'push'
+      #   run: terraform apply -auto-approve -input=false -var-file=main.tfvars.json
+      #   working-directory: ${{ env.INFRA_WORKING_DIRECTORY }}
 
