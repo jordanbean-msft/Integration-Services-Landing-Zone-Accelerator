@@ -153,7 +153,7 @@ module "function_app_app_service_plan" {
   name_suffix                = "function-${local.name_suffix}"
   location                   = var.location
   resource_group_name        = var.resource_group_name
-  os_type                    = "Linux"
+  os_type                    = "Windows"
   sku_name                   = var.function_app.sku_name
   tags                       = local.tags
   zone_balancing_enabled     = var.zone_redundancy_enabled

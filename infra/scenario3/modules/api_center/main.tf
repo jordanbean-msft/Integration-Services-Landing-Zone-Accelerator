@@ -25,14 +25,3 @@ resource "azapi_resource" "api_center" {
   }
   tags = var.tags
 }
-
-# resource "azapi_resource" "api_center_workspace" {
-#   type      = "Microsoft.ApiCenter/services/workspaces@2024-06-01-preview"
-#   name      = "apic-${var.name_suffix}-workspace"
-#   parent_id = azapi_resource.api_center.id
-#   body = {
-#     properties = {
-#       title = "API Center Workspace"
-#     }
-#   }
-# }

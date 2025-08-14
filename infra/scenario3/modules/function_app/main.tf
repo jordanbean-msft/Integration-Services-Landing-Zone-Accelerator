@@ -12,7 +12,7 @@ module "function_app" {
   name                                           = module.naming.function_app.name
   location                                       = var.location
   resource_group_name                            = var.resource_group_name
-  os_type                                        = "Linux"
+  os_type                                        = "Windows"
   service_plan_resource_id                       = var.service_plan_resource_id
   function_app_uses_fc1                          = false
   tags                                           = var.tags
