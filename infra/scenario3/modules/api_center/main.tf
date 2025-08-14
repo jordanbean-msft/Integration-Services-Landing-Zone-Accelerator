@@ -10,7 +10,7 @@ data "azurerm_resource_group" "rg" {
 
 resource "azapi_resource" "api_center" {
   type      = "Microsoft.ApiCenter/services@2024-06-01-preview"
-  name      = "apic-${var.name_suffix}"
+  name      = "apic-${var.name_suffix}1"
   parent_id = data.azurerm_resource_group.rg.id
   location  = var.location
   identity {

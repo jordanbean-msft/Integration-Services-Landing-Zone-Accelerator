@@ -25,7 +25,7 @@ module "function_app" {
     application_insights_connection_string = var.application_insights_connection_string
     application_insights_key               = var.application_insights_key
     vnet_route_all_enabled                 = true
-    linux_fx_version                       = "Java|21"
+    java_version                           = "21"
     always_on                              = true
   }
   vnet_image_pull_enabled                  = true
@@ -48,17 +48,3 @@ module "function_app" {
   #   }
   # }
 }
-
-# Temp fix until site_config.linux_fx_version is available
-resource "azapi_update_resource" "update_function_app" {
-  type        = "Microsoft.Web/sites@2024-11-01"
-  resource_id = module.function_app.resource_id
-  body = {
-    properties = {
-      siteConfig = {
-        linuxFxVersion = "Java|21"
-      }
-    }
-  }
-}
-
