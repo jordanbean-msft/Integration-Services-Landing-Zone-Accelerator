@@ -1,4 +1,0 @@
-name: integration-services-landing-zone-accelerator
-infra:
-  provider: terraform
-  path: ./infra/scenario3

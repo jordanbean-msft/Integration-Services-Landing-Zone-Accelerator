@@ -95,3 +95,23 @@ A pipeline is defined in `.github/workflows/scenario3-deploy.yaml`:
 - Logs into Azure using credentials from GitHub secrets.
 - Initializes Terraform and generates `terraform.tfvars.json` using environment variables.
 - Runs `terraform plan` and (optionally) `terraform apply` on pushes to the default branch.
+
+## Azure Service Documentation Links
+
+Below are official Microsoft Learn documentation links for each Azure service referenced in the Terraform modules:
+
+- **Managed Identity**: [Managed identities for Azure resources](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview)
+- **Storage Account**: [Create an Azure storage account](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-create)
+- **Virtual Network**: [Azure Virtual Network overview](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview)
+- **App Service Environment**: [App Service Environment overview](https://learn.microsoft.com/en-us/azure/app-service/environment/overview)
+- **App Service Plan**: [What are Azure App Service plans?](https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans)
+- **Key Vault**: [About Azure Key Vault](https://learn.microsoft.com/en-us/azure/key-vault/general/overview)
+- **Azure Functions**: [Azure Functions overview](https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview)
+- **Logic Apps**: [What is Azure Logic Apps?](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview)
+- **Event Hub**: [Azure Event Hubs overview](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about)
+- **Network Security Group**: [Azure network security groups overview](https://learn.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview)
+- **API Management**: [What is Azure API Management?](https://learn.microsoft.com/en-us/azure/api-management/api-management-key-concepts)
+- **SQL Database**: [What is Azure SQL Database?](https://learn.microsoft.com/en-us/azure/azure-sql/database/sql-database-paas-overview?view=azuresql)
+- **Service Bus**: [What is Azure Service Bus?](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview)
+- **App Configuration**: [What is Azure App Configuration?](https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview)
+- **API Center**: [What is Azure API Center?](https://learn.microsoft.com/en-us/azure/api-center/overview)
