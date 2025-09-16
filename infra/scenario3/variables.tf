@@ -103,4 +103,8 @@ variable "api_center" {
   type = object({
     location = string
   })
+  validation {
+    condition     = contains(["eastus", "westeurope", "uksouth", "centralindia", "australiaeast", "francecentral", "swedencentral", "canadacentral"], var.api_center.location)
+    error_message = "The api_center.location must be one of: eastus, westeurope, uksouth, centralindia, australiaeast, francecentral, swedencentral, canadacentral."
+  }
 }

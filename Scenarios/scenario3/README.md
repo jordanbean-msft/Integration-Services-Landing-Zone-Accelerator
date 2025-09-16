@@ -12,9 +12,12 @@ This scenario uses Terraform to provision Azure resources. Infrastructure code i
 
 - Azure CLI installed
 - Terraform CLI installed
+- An Azure AD Service Principal that can perform write actions on the target subscription
+- An existing Azure Virtual Network with separate subnets for Private Endpoints, API Management, and App Service Environment
+  - App Service Environment requires a dedicated subnet with at least a /24 address space as well as a delegation to `Microsoft.Web/hostingEnvironments`
+- Resource Provider registration for `Microsoft.ApiCenter`
 
 ## Required Environment Variables
-
 
 Set the following environment variables before running deployments. These are referenced in `main.tfvars.json`:
 
@@ -34,7 +37,7 @@ Set the following environment variables before running deployments. These are re
 | `AZURE_WEBSITE_DNS_SERVER` | DNS server address for web apps |
 | `AZURE_SQL_ADMIN_USERNAME` | Azure SQL administrator username |
 | `AZURE_SQL_ADMIN_OBJECT_ID` | Azure AD object ID for SQL administrator |
-| `AZURE_API_CENTER_LOCATION` | Location for API Center resources |
+| `AZURE_API_CENTER_LOCATION` | Location for API Center resources (`eastus,westeurope,uksouth,centralindia,australiaeast,francecentral,swedencentral,canadacentral`) |
 
 Additional variables for remote state backend (used in GitHub Actions):
 
@@ -43,6 +46,7 @@ Additional variables for remote state backend (used in GitHub Actions):
 | `RS_CONTAINER_NAME` | Name of the Azure Storage container for Terraform state |
 | `RS_RESOURCE_GROUP` | Resource group containing the storage account |
 | `RS_STORAGE_ACCOUNT` | Name of the Azure Storage account for Terraform state |
+| `RS_SUBSCRIPTION_ID` | Azure subscription ID for the storage account |
 | `ARM_SUBSCRIPTION_ID` | Azure subscription ID for ARM deployments |
 | `AZURE_SUBSCRIPTION_ID` | Azure subscription ID for resource deployment |
 
@@ -55,7 +59,9 @@ Additional variables for remote state backend (used in GitHub Actions):
 	  -backend-config="storage_account_name=$RS_STORAGE_ACCOUNT" \
 	  -backend-config="container_name=$RS_CONTAINER_NAME" \
 	  -backend-config="key=azd/azd.tfstate" \
-	  -backend-config="resource_group_name=$RS_RESOURCE_GROUP"
+	  -backend-config="resource_group_name=$RS_RESOURCE_GROUP" \
+	  -backend-config="subscription_id=$RS_SUBSCRIPTION_ID" \
+	  -backend-config="use_azuread_auth=true" (Required if storage account uses AAD auth, do not set for key-based auth)
 	```
 3. **Format Terraform files:**
 	```bash
@@ -65,6 +71,10 @@ Additional variables for remote state backend (used in GitHub Actions):
 	```bash
 	chmod +x generate-tfvars.sh
 	./generate-tfvars.sh
+	```
+	or on Windows:
+	```powershell
+	./generate-tfvars.ps1
 	```
 5. **Plan deployment:**
 	```bash
@@ -108,10 +118,8 @@ Below are official Microsoft Learn documentation links for each Azure service re
 - **Key Vault**: [About Azure Key Vault](https://learn.microsoft.com/en-us/azure/key-vault/general/overview)
 - **Azure Functions**: [Azure Functions overview](https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview)
 - **Logic Apps**: [What is Azure Logic Apps?](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview)
-- **Event Hub**: [Azure Event Hubs overview](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about)
 - **Network Security Group**: [Azure network security groups overview](https://learn.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview)
 - **API Management**: [What is Azure API Management?](https://learn.microsoft.com/en-us/azure/api-management/api-management-key-concepts)
-- **SQL Database**: [What is Azure SQL Database?](https://learn.microsoft.com/en-us/azure/azure-sql/database/sql-database-paas-overview?view=azuresql)
 - **Service Bus**: [What is Azure Service Bus?](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview)
 - **App Configuration**: [What is Azure App Configuration?](https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview)
 - **API Center**: [What is Azure API Center?](https://learn.microsoft.com/en-us/azure/api-center/overview)
